@@ -1,9 +1,6 @@
 package com.ataide.corona.coronatracker.domain;
 
 import com.ataide.corona.coronatracker.application.dtos.VisitStoreDto;
-import com.ataide.corona.coronatracker.application.exceptions.ConstraintViolationsException;
-import com.ataide.corona.coronatracker.application.exceptions.EntityNotFoundException;
-import com.ataide.corona.coronatracker.application.exceptions.MissingRequiredParameterException;
 import com.ataide.corona.coronatracker.domain.entities.Store;
 import com.ataide.corona.coronatracker.domain.entities.User;
 import com.ataide.corona.coronatracker.domain.entities.UserType;
@@ -11,15 +8,11 @@ import com.ataide.corona.coronatracker.domain.entities.VisitedStore;
 import com.ataide.corona.coronatracker.domain.repository.VisitedStoreRepository;
 import com.ataide.corona.coronatracker.domain.service.interfaces.StoreService;
 import com.ataide.corona.coronatracker.domain.service.interfaces.VisitService;
-import lombok.AllArgsConstructor;
-import org.junit.jupiter.api.Test;
 import org.junit.platform.runner.JUnitPlatform;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase;
 import org.springframework.boot.test.context.SpringBootTest;
-
-import static org.assertj.core.api.Assertions.assertThat;
 
 @SpringBootTest
 @RunWith(JUnitPlatform.class)

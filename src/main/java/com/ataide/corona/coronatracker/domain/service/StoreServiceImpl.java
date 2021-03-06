@@ -6,7 +6,6 @@ import com.ataide.corona.coronatracker.application.exceptions.EntityNotFoundExce
 import com.ataide.corona.coronatracker.application.exceptions.MissingRequiredParameterException;
 import com.ataide.corona.coronatracker.domain.entities.Store;
 import com.ataide.corona.coronatracker.domain.entities.User;
-import com.ataide.corona.coronatracker.domain.entities.UserType;
 import com.ataide.corona.coronatracker.domain.repository.StoreRepository;
 import com.ataide.corona.coronatracker.domain.service.interfaces.StoreService;
 import com.ataide.corona.coronatracker.domain.util.ServerUtil;
@@ -19,7 +18,6 @@ import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
 import static org.springframework.data.domain.PageRequest.of;
-import static org.springframework.transaction.TransactionDefinition.PROPAGATION_REQUIRED;
 
 @RequiredArgsConstructor
 @Service
