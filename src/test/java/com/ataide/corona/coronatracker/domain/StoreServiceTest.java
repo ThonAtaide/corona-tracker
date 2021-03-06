@@ -9,10 +9,8 @@ import com.ataide.corona.coronatracker.domain.entities.User;
 import com.ataide.corona.coronatracker.domain.repository.StoreRepository;
 import com.ataide.corona.coronatracker.domain.repository.UserRepository;
 import com.ataide.corona.coronatracker.domain.service.StoreServiceImpl;
-import com.ataide.corona.coronatracker.domain.util.SecurityUtils;
 import com.ataide.corona.coronatracker.util.DatabaseUtils;
 import org.junit.jupiter.api.AfterEach;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -23,9 +21,6 @@ import org.springframework.data.domain.Page;
 import org.springframework.test.annotation.DirtiesContext;
 
 import javax.sql.DataSource;
-import java.sql.Connection;
-import java.sql.SQLException;
-import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
@@ -50,25 +45,16 @@ public class StoreServiceTest {
     @Autowired
     private DataSource dataSource;
 
-    @BeforeEach
-    public void init() throws SQLException {
-        Connection connection = dataSource.getConnection();
-        List<String> inserts = databaseInserts();
-        inserts.forEach(insert ->
-                DatabaseUtils.executeInsertStatements(connection, insert));
-        logger.info("Database data loaded");
-    }
-
     @AfterEach
     public void tearDown() {
-        DatabaseUtils.clearDatabaseTables(dataSource);
+        DatabaseUtils.clearDatabaseData(dataSource);
         logger.info("Database clear");
     }
 
     @Test
     public void createStoreSuccess() throws ConstraintViolationsException {
         StoreDto storeDto = mockValidStoreDto();
-        User user = userRepository.findById(10L).orElseThrow(NullPointerException::new);
+        User user = userRepository.findById(5L).orElseThrow(NullPointerException::new);
         int expectedSize = repository.findAll().size() + 1;
 
         Store storeCreated = service.createStore(storeDto, user);
@@ -85,7 +71,7 @@ public class StoreServiceTest {
 
     @Test
     public void testUpdateValid() throws ConstraintViolationsException, EntityNotFoundException, MissingRequiredParameterException {
-        long storeId = 6;
+        long storeId = 4;
         StoreDto storeDto = storeDtoForUpdateValid();
 
         Store storeCreated = service.updateStore(storeDto, storeId);
@@ -118,7 +104,7 @@ public class StoreServiceTest {
 /////////////////////////////
     @Test
     public void testStoreByIdSuccess() throws EntityNotFoundException, MissingRequiredParameterException {
-        long storeId = 6;
+        long storeId = 1;
         Store store = repository.findById(storeId).orElseThrow(NullPointerException::new);
 
         Store storeFetched = service.getStore(storeId);
@@ -132,7 +118,7 @@ public class StoreServiceTest {
 
     @Test
     public void testStoreByIdNotFound() {
-        assertThrows(EntityNotFoundException.class, () -> assertThat(service.getStore(1L)));
+        assertThrows(EntityNotFoundException.class, () -> assertThat(service.getStore(10L)));
     }
 
     @Test
@@ -183,7 +169,7 @@ public class StoreServiceTest {
 
     private StoreDto storeDtoForUpdateValid() {
         return StoreDto.builder()
-                .id(6L)
+                .id(4L)
                 .name("Casas Bahia")
                 .phone("1478996655")
                 .cep("13571458")
@@ -199,26 +185,5 @@ public class StoreServiceTest {
                 .cnpj("196935000901")
                 .cep("876986")
                 .build();
-    }
-
-    private List<String> databaseInserts() {
-        String golden12Pwd = SecurityUtils.encrypt("GOLDEN12");
-        String rosarioPwd = SecurityUtils.encrypt("ROSARIO");
-        String tecunshPwd = SecurityUtils.encrypt("TECUNSH");
-        String neidinhaPwd = SecurityUtils.encrypt("NEIDINHA");
-        String testuserPwd = SecurityUtils.encrypt("TESTUSER");
-
-        return List.of(
-                "INSERT INTO USER_TABLE (ID, USERNAME, PASSWORD, ROLE) VALUES (6, 'GOLDEN12', '" + golden12Pwd  + "' , 'STORE')",
-                "INSERT INTO USER_TABLE (ID, USERNAME, PASSWORD, ROLE) VALUES (7, 'ROSARIO', '" + rosarioPwd +"', 'STORE')",
-                "INSERT INTO USER_TABLE (ID, USERNAME, PASSWORD, ROLE) VALUES (8, 'TECUNSH', '" + tecunshPwd +"', 'STORE')",
-                "INSERT INTO USER_TABLE (ID, USERNAME, PASSWORD, ROLE) VALUES (9, 'NEIDINHA', '" + neidinhaPwd +"', 'STORE')",
-                "INSERT INTO USER_TABLE (ID, USERNAME, PASSWORD, ROLE) VALUES (10, 'TESTUSER', '" + testuserPwd +"', 'STORE')",
-                "INSERT INTO STORE (ID, NAME, PHONE, CNPJ, CEP, USER_ID) VALUES (6, 'Golden Sports', '1633075499', '04196935000901', '14876986', '6')",
-                "INSERT INTO STORE (ID, NAME, PHONE, CNPJ, CEP, USER_ID) VALUES (7, 'Drogaria Rosário', '1633384791', '04196935011901', '14876981', '7')",
-                "INSERT INTO STORE (ID, NAME, PHONE, CNPJ, CEP, USER_ID) VALUES (8, 'Tecunsh', '1933885499', '12396935000901', '58776986', '8')",
-                "INSERT INTO STORE (ID, NAME, PHONE, CNPJ, CEP, USER_ID) VALUES (9, 'Neidinha Frios', '1633075400', '04196935100901', '14815986', '9')"
-
-        );
     }
 }

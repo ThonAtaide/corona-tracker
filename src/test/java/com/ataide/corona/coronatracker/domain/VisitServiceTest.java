@@ -1,6 +1,9 @@
 package com.ataide.corona.coronatracker.domain;
 
 import com.ataide.corona.coronatracker.application.dtos.VisitStoreDto;
+import com.ataide.corona.coronatracker.application.exceptions.ConstraintViolationsException;
+import com.ataide.corona.coronatracker.application.exceptions.EntityNotFoundException;
+import com.ataide.corona.coronatracker.application.exceptions.MissingRequiredParameterException;
 import com.ataide.corona.coronatracker.domain.entities.Store;
 import com.ataide.corona.coronatracker.domain.entities.User;
 import com.ataide.corona.coronatracker.domain.entities.UserType;
@@ -8,6 +11,7 @@ import com.ataide.corona.coronatracker.domain.entities.VisitedStore;
 import com.ataide.corona.coronatracker.domain.repository.VisitedStoreRepository;
 import com.ataide.corona.coronatracker.domain.service.interfaces.StoreService;
 import com.ataide.corona.coronatracker.domain.service.interfaces.VisitService;
+import org.junit.jupiter.api.Test;
 import org.junit.platform.runner.JUnitPlatform;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -31,11 +35,10 @@ public class VisitServiceTest {
     private final long storeId = 1;
 
 //    @Test
-//    public void createStoreSuccess() throws EntityNotFoundException, MissingRequiredParameterException, ConstraintViolationsException {
+//    public void registerValidVisit() throws EntityNotFoundException, MissingRequiredParameterException, ConstraintViolationsException {
 //        VisitStoreDto visitStoreDto = mockValidVisitStoreDto();
 //
-//        when(storeService.validateStoreId(storeId)).thenReturn(mockStoreEntity());
-//        when(repository.save(any(VisitedStore.class))).thenReturn(mockValidVisitStore());
+//
 //
 //        VisitedStore visit = service.createVisit(visitStoreDto, 1L);
 //

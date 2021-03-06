@@ -13,64 +13,29 @@ public class DatabaseUtils {
 
     private static final Logger logger = LoggerFactory.getLogger(DatabaseUtils.class);
 
-    public static void clearDatabaseTables(DataSource dataSource) {
-        Connection connection = null;
+    private static void executeSqlStatements(Connection connection, String sqlCommand) {
+        logger.info("Executing sql statement: {}", sqlCommand);
         try {
-            connection = dataSource.getConnection();
-            List<String> tableNames = getTableNames(connection);
-            clear(tableNames, connection);
-        } catch (SQLException throwables) {
-            throwables.printStackTrace();
-        }
-    }
-
-    private static List<String> getTableNames(Connection connection) throws SQLException {
-        List<String> tableNames = new ArrayList<>();
-
-        DatabaseMetaData metaData = connection.getMetaData();
-        ResultSet rs = metaData.getTables(
-                connection.getCatalog(), null, null, new String[]{"TABLE"});
-
-        while (rs.next()) {
-            tableNames.add(rs.getString("TABLE_NAME"));
-        }
-        return tableNames;
-    }
-
-    private static void clear(List<String> tableNames, Connection connection) throws SQLException {
-        Statement statement = buildSqlStatement(tableNames, connection);
-
-        logger.debug("Executing SQL");
-        statement.executeBatch();
-    }
-
-    private static Statement buildSqlStatement(List<String> tableNames, Connection connection) throws SQLException {
-        Statement statement = connection.createStatement();
-
-        statement.addBatch("SET FOREIGN_KEY_CHECKS = 0");
-        addDeleteStatements(tableNames, statement);
-        statement.addBatch("SET FOREIGN_KEY_CHECKS = 1");
-
-        return statement;
-    }
-
-    private static void addDeleteStatements(List<String> tableNames, Statement statement) {
-        tableNames.forEach(tableName -> {
-            try {
-                statement.addBatch("DELETE FROM " + tableName);
-            } catch (SQLException e) {
-                throw new RuntimeException(e);
-            }
-        });
-    }
-
-    public static void executeInsertStatements(Connection connection, String rowInsert) {
-
-        try {
-            PreparedStatement preparedStatement = connection.prepareStatement(rowInsert);
+            PreparedStatement preparedStatement = connection.prepareStatement(sqlCommand);
             preparedStatement.execute();
         } catch (SQLException e) {
             e.printStackTrace();
+        }
+    }
+
+    public static void clearDatabaseData (DataSource dataSource) {
+        try {
+            final Connection connection = dataSource.getConnection();
+            List.of(
+                    "DELETE FROM VISITED_STORE",
+                    "DELETE FROM DIAGNOSED",
+                    "DELETE FROM HEALTH_UNITY",
+                    "DELETE FROM STORE",
+                    "DELETE FROM PERSON",
+                    "DELETE FROM USER_TABLE"
+            ).forEach(delete -> executeSqlStatements(connection, delete));
+        } catch (SQLException ex) {
+            ex.printStackTrace();
         }
     }
 }
