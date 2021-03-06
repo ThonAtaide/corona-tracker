@@ -1,6 +1,5 @@
 package com.ataide.corona.coronatracker.domain.service;
 
-import com.ataide.corona.coronatracker.application.dtos.RegisterUserDto;
 import com.ataide.corona.coronatracker.application.dtos.StoreDto;
 import com.ataide.corona.coronatracker.application.exceptions.ConstraintViolationsException;
 import com.ataide.corona.coronatracker.application.exceptions.EntityNotFoundException;
@@ -9,62 +8,49 @@ import com.ataide.corona.coronatracker.domain.entities.Store;
 import com.ataide.corona.coronatracker.domain.entities.User;
 import com.ataide.corona.coronatracker.domain.entities.UserType;
 import com.ataide.corona.coronatracker.domain.repository.StoreRepository;
-import com.ataide.corona.coronatracker.domain.repository.UserRepository;
 import com.ataide.corona.coronatracker.domain.service.interfaces.StoreService;
 import com.ataide.corona.coronatracker.domain.util.ServerUtil;
-import lombok.AllArgsConstructor;
+import lombok.RequiredArgsConstructor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.data.domain.Page;
 import org.springframework.stereotype.Service;
-
-import javax.validation.ConstraintViolation;
-import javax.validation.Validation;
-import javax.validation.Validator;
-import javax.validation.ValidatorFactory;
-
-import java.util.ArrayList;
-import java.util.Set;
+import org.springframework.transaction.annotation.Propagation;
+import org.springframework.transaction.annotation.Transactional;
 
 import static org.springframework.data.domain.PageRequest.of;
+import static org.springframework.transaction.TransactionDefinition.PROPAGATION_REQUIRED;
 
-@AllArgsConstructor
+@RequiredArgsConstructor
 @Service
 public class StoreServiceImpl implements StoreService {
 
     private static final Logger logger = LoggerFactory.getLogger(StoreServiceImpl.class);
-    private StoreRepository repository;
+    private final StoreRepository repository;
 
     @Override
     public Page<Store> getStores(Integer page, Integer pageSize) {
         logger.info("getStores method called - page {} - pageSize {}", page, pageSize);
 
-        if (page == null) page = 1;
+        if (page == null) page = 0;
         if (pageSize == null) pageSize = 10;
 
         return repository.findAll(of(page, pageSize));
     }
 
     @Override
-    public Store getStore(Long storeId) throws Exception {
+    public Store getStore(Long storeId) throws MissingRequiredParameterException, EntityNotFoundException {
         logger.info("getStore method called - storeId {}",storeId);
-
-        if (storeId == null) {
-            throw new EntityNotFoundException("Loja não encontrada.");
-        }
-        return repository.findById(storeId).orElse(null);
+        return validateStoreId(storeId);
     }
 
+
     @Override
-    public Store createStore(StoreDto storeDto, User user) throws MissingRequiredParameterException, ConstraintViolationsException {
+    @Transactional(propagation = Propagation.SUPPORTS)
+    public Store createStore(StoreDto storeDto, User user) throws ConstraintViolationsException {
         logger.info("createStore method called - storeDto {}", storeDto);
 
-        Validator validator = ServerUtil.getValidator();
-        Set<ConstraintViolation<StoreDto>> constraintViolations = validator.validate(storeDto);
-
-        validConstraintViolations(constraintViolations);
-
-        user.setRole(UserType.STORE.toString());
+        ServerUtil.validConstraintViolations(storeDto);
 
         Store.StoreBuilder builder = Store.builder();
         Store store = builder
@@ -78,29 +64,32 @@ public class StoreServiceImpl implements StoreService {
         return repository.save(store);
     }
 
-    private void validConstraintViolations(Set<ConstraintViolation<StoreDto>> constraintViolations) throws ConstraintViolationsException {
-        if (constraintViolations.size() > 0 ) throw new ConstraintViolationsException(new ArrayList<>(constraintViolations));
-    }
-
     @Override
-    public Store updateStore(StoreDto storeDto, Long storeId) throws MissingRequiredParameterException {
+    @Transactional(propagation = Propagation.REQUIRED)
+    public Store updateStore(StoreDto storeDto, Long storeId) throws MissingRequiredParameterException, EntityNotFoundException, ConstraintViolationsException {
         logger.info("updateStore method called - storeDto {} - storeId {}", storeDto, storeId);
 
-        if (storeId == null) throw new MissingRequiredParameterException("Dados de entrada incompletos");
+        ServerUtil.validConstraintViolations(storeDto);
+        Store store = validateStoreId(storeId);
 
-        Store.StoreBuilder builder = Store.builder();
-        Store store = builder
-                .id(storeId)
-                .name(storeDto.getName())
-                .phone(storeDto.getPhone())
-                .cnpj(storeDto.getCnpj())
-                .cep(storeDto.getCep())
-                .build();
+        store.setId(storeId);
+        store.setName(storeDto.getName());
+        store.setPhone(storeDto.getPhone());
+        store.setCnpj(storeDto.getCnpj());
+        store.setCep(storeDto.getCep());
 
         return repository.save(store);
     }
 
+    public Store validateStoreId(Long storeId) throws MissingRequiredParameterException, EntityNotFoundException {
+        if (storeId == null) throw new MissingRequiredParameterException("O id da loja não foi informado.");
 
+        return repository.findById(storeId).orElseThrow(() -> new EntityNotFoundException("Loja não encontrada."));
+    }
 
-
+    @Override
+    public Store getStoreByUser(Long userId) {
+        logger.info("getStoreByUser method called - userId {}", userId);
+        return repository.findStoreByUser(userId);
+    }
 }

@@ -16,8 +16,9 @@ import java.sql.Timestamp;
 public class VisitedStore {
 
     @Id
-    @Column(name = "ID")
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Column(name = "ID", nullable = false, updatable = false)
+    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "VISITED_STORE_SEQ")
+    @SequenceGenerator(name="VISITED_STORE_SEQ", sequenceName="VISITED_STORE_SEQ", allocationSize=1)
     private Long id;
 
     @Column(name = "NAME", length = 100)
@@ -25,9 +26,6 @@ public class VisitedStore {
 
     @Column(name = "PHONE", length = 11, unique = true)
     private String phone;
-
-    @Column(name = "CEP", length = 8)
-    private String cep;
 
     @Builder.Default
     @Column(name = "CREATED_AT")

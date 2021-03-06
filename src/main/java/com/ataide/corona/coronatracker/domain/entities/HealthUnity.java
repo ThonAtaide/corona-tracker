@@ -14,8 +14,9 @@ import javax.persistence.*;
 public class HealthUnity {
 
     @Id
-    @Column(name = "ID")
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Column(name = "ID", nullable = false, updatable = false)
+    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "HEALTH_UNITY_SEQ")
+    @SequenceGenerator(name="HEALTH_UNITY_SEQ", sequenceName="HEALTH_UNITY_SEQ", allocationSize=1)
     private Long id;
 
     @Column(name = "NAME", length = 100)

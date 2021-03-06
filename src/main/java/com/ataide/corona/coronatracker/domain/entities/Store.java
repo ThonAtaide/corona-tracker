@@ -15,8 +15,9 @@ import java.sql.Timestamp;
 public class Store {
 
     @Id
-    @Column(name = "ID")
-    @GeneratedValue(strategy = GenerationType.AUTO)
+    @Column(name = "ID", nullable = false, updatable = false)
+    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "STORE_SEQ")
+    @SequenceGenerator(name="STORE_SEQ", sequenceName="STORE_SEQ", allocationSize=1)
     private Long id;
 
     @Column(name = "NAME", length = 100)

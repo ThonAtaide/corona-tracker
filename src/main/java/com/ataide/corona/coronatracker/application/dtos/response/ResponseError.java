@@ -8,13 +8,18 @@ import lombok.NoArgsConstructor;
 import lombok.experimental.SuperBuilder;
 
 import java.time.LocalDateTime;
+import java.util.List;
 
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
-public abstract class Response {
+public class ResponseError extends Response {
     @JsonProperty
-    private Integer statusCode;
-    @JsonProperty
-    private LocalDateTime timestamp;
+    private List<String> errors;
+
+    @Builder
+    public ResponseError(Integer statusCode, List<String> errors, LocalDateTime timestamp) {
+        super(statusCode, timestamp);
+        this.errors = errors;
+    }
 }

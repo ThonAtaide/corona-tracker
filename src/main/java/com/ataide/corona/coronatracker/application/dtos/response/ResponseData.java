@@ -5,16 +5,20 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-import lombok.experimental.SuperBuilder;
 
 import java.time.LocalDateTime;
+
 
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
-public abstract class Response {
+public class ResponseData extends Response {
     @JsonProperty
-    private Integer statusCode;
-    @JsonProperty
-    private LocalDateTime timestamp;
+    private RecordData data;
+
+    @Builder
+    public ResponseData(Integer statusCode, RecordData data, LocalDateTime timestamp) {
+        super(statusCode, timestamp);
+        this.data = data;
+    }
 }

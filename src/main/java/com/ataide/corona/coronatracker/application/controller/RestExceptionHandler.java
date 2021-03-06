@@ -1,7 +1,9 @@
 package com.ataide.corona.coronatracker.application.controller;
 
-import com.ataide.corona.coronatracker.application.dtos.response.ErrorRecord;
+import com.ataide.corona.coronatracker.application.dtos.response.ResponseError;
 import com.ataide.corona.coronatracker.application.dtos.response.Response;
+import com.ataide.corona.coronatracker.application.exceptions.MissingRequiredParameterException;
+import com.ataide.corona.coronatracker.application.exceptions.UsernameAllocatedException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.core.Ordered;
@@ -26,10 +28,10 @@ public class RestExceptionHandler {
 
     private static final Logger logger = LoggerFactory.getLogger(RestExceptionHandler.class);
 
-    @ExceptionHandler(TransactionSystemException.class)
     @ResponseBody
+    @ExceptionHandler(TransactionSystemException.class)
     protected Response handleConstraintViolationException(TransactionSystemException ex) {
-        logger.error("Handle constraint violation exception - {}");
+        logger.error("Handle constraint violation exception - {1}");
         ex.printStackTrace();
         List<String> errors;
         if (ex.getRootCause() instanceof ConstraintViolationException) {
@@ -39,7 +41,28 @@ public class RestExceptionHandler {
         } else {
             errors = Collections.singletonList("Houve um erro inesperado.");
         }
-        ErrorRecord errorRecord = new ErrorRecord(errors);
-        return new Response(HttpStatus.BAD_REQUEST.value(), errorRecord, LocalDateTime.now());
+        return new ResponseError(HttpStatus.BAD_REQUEST.value(), errors, LocalDateTime.now());
     }
+
+    @ResponseBody
+    @ExceptionHandler(value = { UsernameAllocatedException.class, MissingRequiredParameterException.class })
+    protected Response handleUsernameAllocatedException(UsernameAllocatedException ex) {
+        logger.error("Handle {}", ex.getClass().getName());
+        return new ResponseError(HttpStatus.BAD_REQUEST.value(), List.of(ex.getMessage()), LocalDateTime.now());
+    }
+
+//    @ResponseBody
+//    @ExceptionHandler(value = {MissingRequiredParameterException.class})
+//    protected Response handleMissingRequiredParameterException(MissingRequiredParameterException ex) {
+//        logger.error("Handle MissingRequiredParameterException exception");
+//
+//        return new ResponseError(HttpStatus.BAD_REQUEST.value(), List.of(ex.getMessage()), LocalDateTime.now());
+//    }
+
+
+//    return Response.builder()
+//            .statusCode(HttpStatus.CREATED.value())
+//            .data(null)
+//                .timestamp(LocalDateTime.now())
+//            .build();
 }

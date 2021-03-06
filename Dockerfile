@@ -2,9 +2,10 @@ FROM maven:3.6.3-openjdk-17-slim as build
 WORKDIR /app
 COPY /src /app/src
 COPY /pom.xml /app
+RUN mvn clean dependency:resolve
 
 FROM build as dep
-RUN mvn clean install
+RUN mvn install
 
 FROM openjdk:11.0-jre
 COPY --from=dep /app/target/corona-tracker-0.0.1-SNAPSHOT.jar app.jar
