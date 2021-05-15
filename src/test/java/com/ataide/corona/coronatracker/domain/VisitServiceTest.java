@@ -23,6 +23,7 @@ import org.springframework.boot.test.context.SpringBootTest;
 @AutoConfigureTestDatabase
 public class VisitServiceTest {
 
+
     @Autowired
     private VisitService service;
 
